@@ -1,0 +1,61 @@
+# Use root/example as user/password credentials
+version: '3.7'
+
+services:
+
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=demo
+      - MYSQL_USER=layer
+      - MYSQL_PASSWORD=demo
+    ports:
+      - 3306:3306
+    networks:
+      - backend
+    volumes:
+      - type: bind
+        source: ./sql_scripts/init_data.sql
+        target: /docker-entrypoint-initdb.d/init_data.sql
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    networks:
+      - backend
+    depends_on:
+      - db
+
+  redis:
+    image: redis:alpine
+    networks:
+      - backend
+    ports:
+      - 6379:6379
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+
+volumes:
+  dbdata:
+    external: true
+
+networks:
+  backend:
