@@ -1,4 +1,3 @@
-# Use root/example as user/password credentials
 version: '3.7'
 
 services:
@@ -10,14 +9,11 @@ services:
       - MYSQL_ROOT_PASSWORD=demo
       - MYSQL_USER=layer
       - MYSQL_PASSWORD=demo
+      - MYSQL_DATABASE=demo
     ports:
       - 3306:3306
     networks:
       - backend
-    volumes:
-      - type: bind
-        source: ./sql_scripts/init_data.sql
-        target: /docker-entrypoint-initdb.d/init_data.sql
     deploy:
       replicas: 1
       update_config:
@@ -28,10 +24,11 @@ services:
       placement:
         constraints: [node.role == manager]
 
+# Not required in production
   adminer:
     image: adminer
     ports:
-      - 8080:8080
+      - 8080:8888
     networks:
       - backend
     depends_on:
@@ -52,10 +49,6 @@ services:
         condition: on-failure
       placement:
         constraints: [node.role == manager]
-
-volumes:
-  dbdata:
-    external: true
 
 networks:
   backend:
