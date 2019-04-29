@@ -42,8 +42,7 @@ CREATE TABLE access (
 access_id BIGINT AUTO_INCREMENT PRIMARY KEY,
 sheet_id BIGINT NOT NULL,
 user_id BIGINT NOT NULL,
-read_access_bitmap VARBINARY(8) NOT NULL DEFAULT '0',
-write_access_bitmap VARBINARY(8) NOT NULL DEFAULT '0',
+access_matrix JSON,
 is_deleted BIT(1) NOT NULL DEFAULT 0,
 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -58,9 +57,9 @@ INSERT INTO users (user_id, user_name, email) VALUES (2, 'user2', 'user2@email.c
 INSERT INTO users (user_id, user_name, email) VALUES (3, 'user3', 'user3@email.com');
 INSERT INTO files (file_id, file_name, git_repo, uri_path) VALUES (1, 'demo_file', 'https://github.com/fabiocarneiro/backend-engineer-test-lalitpagaria.git', 'files/');
 INSERT INTO files (file_id, file_name, git_repo, uri_path) VALUES (2, 'file1', 'https://github.com/fabiocarneiro/backend-engineer-test-lalitpagaria.git', 'files/');
-INSERT INTO sheets (sheet_id, file_id, sheet_name, sheet_order) VALUES (1, 1, 'sheet1.tsv', 1);
-INSERT INTO sheets (sheet_id, file_id, sheet_name, sheet_order) VALUES (2, 1, 'sheet with space.tsv', 2);
-INSERT INTO sheets (sheet_id, file_id, sheet_name, sheet_order) VALUES (3, 2, 'HRReport.tsv', 1);
-INSERT INTO sheets (sheet_id, file_id, sheet_name, sheet_order) VALUES (4, 2, 'Actuals.tsv', 2);
-INSERT INTO sheets (sheet_id, file_id, sheet_name, sheet_order) VALUES (5, 2, 'Assumptions.tsv', 3);
-INSERT INTO sheets (sheet_id, file_id, sheet_name, sheet_order) VALUES (6, 2, 'Dashboard.tsv', 4);
+INSERT INTO sheets (sheet_id, file_id, sheet_name, sheet_order) VALUES (1, 1, 'sheet1', 1);
+INSERT INTO sheets (sheet_id, file_id, sheet_name, sheet_order) VALUES (2, 1, 'sheet with space', 2);
+INSERT INTO sheets (sheet_id, file_id, sheet_name, sheet_order) VALUES (3, 2, 'HRReport', 1);
+INSERT INTO sheets (sheet_id, file_id, sheet_name, sheet_order) VALUES (4, 2, 'Actuals', 2);
+INSERT INTO sheets (sheet_id, file_id, sheet_name, sheet_order) VALUES (5, 2, 'Assumptions', 3);
+INSERT INTO sheets (sheet_id, file_id, sheet_name, sheet_order) VALUES (6, 2, 'Dashboard', 4);
