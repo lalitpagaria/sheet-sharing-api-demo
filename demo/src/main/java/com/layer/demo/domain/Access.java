@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 public class Access {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "access_id")
     private Long accessId;
 
     @ManyToOne
@@ -32,17 +33,17 @@ public class Access {
     private User user;
 
     @Type(type = "json")
-    @Column(columnDefinition = "json")
+    @Column(name = "access_matrix", columnDefinition = "json")
     private AccessMatrix accessMatrix;
 
-    @NotBlank
+    @Column(name = "is_deleted")
     private Boolean isDeleted;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private Timestamp createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "modified_at", nullable = false)
     @LastModifiedDate
     private Timestamp modifiedAt;
 }

@@ -17,29 +17,32 @@ import java.sql.Timestamp;
 public class File {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "file_id")
     private Long fileId;
 
     @NotBlank
-    @Column(unique = true)
+    @Column(name = "file_name", unique = true)
     @Size(min = 1, max = 255)
     private String fileName;
 
     @NotBlank
     @Size(min = 1, max = 255)
+    @Column(name = "git_repo")
     private String gitRepo;
 
     @NotBlank
     @Size(min = 1, max = 255)
+    @Column(name = "uri_path")
     private String uriPath;
 
-    @NotBlank
+    @Column(name = "is_deleted")
     private Boolean isDeleted;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private Timestamp createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "modified_at", nullable = false)
     @LastModifiedDate
     private Timestamp modifiedAt;
 }

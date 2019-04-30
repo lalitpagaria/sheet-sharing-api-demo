@@ -34,7 +34,8 @@ sheet_order INT NOT NULL,
 is_deleted BIT(1) NOT NULL DEFAULT 0,
 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-FOREIGN KEY (file_id) REFERENCES files(file_id)
+FOREIGN KEY (file_id) REFERENCES files(file_id),
+UNIQUE INDEX file_id_sheet_name (file_id, sheet_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 # Read and write access of the cells in the sheet to user

@@ -13,10 +13,11 @@ import java.sql.Timestamp;
 @Data
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "sheets")
+@Table(name = "sheets", indexes = { @Index(columnList = "file_id,sheet_name", unique = true)})
 public class Sheet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "sheet_id")
     private Long sheetId;
 
     @ManyToOne
@@ -25,19 +26,20 @@ public class Sheet {
 
     @NotBlank
     @Size(min = 1, max = 255)
+    @Column(name = "sheet_name")
     private String sheetName;
 
-    @NotBlank
+    @Column(name = "sheet_order")
     private Integer sheetOrder;
 
-    @NotBlank
+    @Column(name = "is_deleted")
     private Boolean isDeleted;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private Timestamp createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "modified_at", nullable = false)
     @LastModifiedDate
     private Timestamp modifiedAt;
 }

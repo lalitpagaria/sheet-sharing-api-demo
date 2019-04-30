@@ -17,25 +17,27 @@ import java.sql.Timestamp;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long userId;
 
     @NotBlank
     @Size(max = 100)
+    @Column(name = "user_name")
     private String userName;
 
     @NotBlank
-    @Column(unique = true)
+    @Column(name = "email", unique = true)
     @Size(min = 1, max = 100)
     private String email;
 
-    @NotBlank
+    @Column(name = "is_deleted")
     private Boolean isDeleted;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private Timestamp createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "modified_at", nullable = false)
     @LastModifiedDate
     private Timestamp modifiedAt;
 }
