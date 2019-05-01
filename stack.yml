@@ -24,15 +24,17 @@ services:
       placement:
         constraints: [node.role == manager]
 
-# Not required in production
-  adminer:
-    image: adminer
+  app:
+    image: layer/demo:latest
     ports:
-      - 8080:8888
+      - 9090:9090
+    environment:
+      - "JAVA_OPTS=-Xms512m -Xmx1024m"
     networks:
       - backend
     depends_on:
       - db
+      - redis
 
   redis:
     image: redis:alpine

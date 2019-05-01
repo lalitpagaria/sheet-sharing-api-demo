@@ -30,9 +30,6 @@ public class User {
     @Size(min = 1, max = 100)
     private String email;
 
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private Timestamp createdAt;

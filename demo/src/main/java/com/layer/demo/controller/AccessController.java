@@ -83,7 +83,6 @@ public class AccessController {
                 } else {
                     access = new Access();
                     access.setAccessMatrix(new AccessMatrix());
-                    access.setIsDeleted(false);
                     access.setUser(user);
                     access.setSheet(sheet);
 

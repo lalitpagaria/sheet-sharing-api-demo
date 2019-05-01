@@ -36,9 +36,6 @@ public class Access {
     @Column(name = "access_matrix", columnDefinition = "json")
     private AccessMatrix accessMatrix;
 
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private Timestamp createdAt;

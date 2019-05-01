@@ -32,9 +32,6 @@ public class Sheet {
     @Column(name = "sheet_order")
     private Integer sheetOrder;
 
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private Timestamp createdAt;
