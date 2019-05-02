@@ -10,14 +10,13 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import java.sql.Timestamp;
 
 @Data
 @Entity
 @TypeDef(name = "json", typeClass = JsonStringType.class)
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "access")
+@Table(name = "access", indexes = { @Index(columnList = "user_id,sheet_id", unique = true)})
 public class Access {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

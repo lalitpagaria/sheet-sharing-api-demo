@@ -52,5 +52,15 @@ services:
       placement:
         constraints: [node.role == manager]
 
+  # Not required in production
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    networks:
+      - backend
+    depends_on:
+      - db
+
 networks:
   backend:

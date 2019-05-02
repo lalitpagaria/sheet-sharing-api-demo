@@ -1,12 +1,11 @@
 package com.layer.demo.controller;
 
+import com.layer.demo.constants.Limits;
 import com.layer.demo.domain.Access;
 import com.layer.demo.domain.File;
 import com.layer.demo.domain.Sheet;
 import com.layer.demo.domain.User;
-import com.layer.demo.model.AccessMatrix;
-import com.layer.demo.model.Selection;
-import com.layer.demo.model.SharingRequest;
+import com.layer.demo.model.*;
 import com.layer.demo.repository.AccessRepository;
 import com.layer.demo.repository.FileRepository;
 import com.layer.demo.repository.SheetRepository;
@@ -37,67 +36,91 @@ public class AccessController {
     SheetRepository sheetRepository;
 
     @GetMapping("/list")
-    public List<Access> listAccess() {
-        return accessRepository.findAll();
+    public ResponseEntity<List<SharingResponse>> listSharing() {
+        List<SharingResponse> sharingResponses = new ArrayList<>();
+        List<Access> accessList = accessRepository.findAll();
+        Map<String, SharingResponse> fileSharingMap = new HashMap<>();
+
+        if(null != accessList) {
+            for (Access access: accessList) {
+                String fileName = access.getSheet().getFile().getFileName();
+                String sheetName = access.getSheet().getSheetName();
+
+                SharingResponse sharingResponse = fileSharingMap.get(fileName);
+                if(null == sharingResponse) {
+                    sharingResponse = new SharingResponse();
+                    sharingResponse.setFileName(fileName);
+                    sharingResponse.setSheetAccess(new HashMap<>());
+                    fileSharingMap.put(fileName, sharingResponse);
+
+                    sharingResponses.add(sharingResponse);
+                }
+
+                Map<String, List<CellRange>> userAccessMap = sharingResponse.getSheetAccess().computeIfAbsent(sheetName, k -> new HashMap<>());
+
+                userAccessMap.put(access.getUser().getEmail(), access.getAccessMatrix().getCells());
+            }
+        }
+
+        return new ResponseEntity<>(sharingResponses, HttpStatus.OK);
     }
 
     @PostMapping("/add")
-    public ResponseEntity<SharingRequest> addSharing(@Valid @RequestBody SharingRequest sharingRequest) {
+    public ResponseEntity<Void> addSharing(@Valid @RequestBody SharingRequest sharingRequest) {
         List<User> users = new ArrayList<>();
         for (String email: sharingRequest.getEmails()) {
             User user = userRepository.findByEmail(email);
 
-            if(user != null)
+            if(null != user)
                 users.add(user);
         }
 
         if(users.size() == 0) {
-            new ResponseEntity<SharingRequest>(sharingRequest, HttpStatus.BAD_REQUEST);
+            new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         File file = fileRepository.findByFileName(sharingRequest.getFileName());
-        if(file == null) {
-            new ResponseEntity<SharingRequest>(sharingRequest, HttpStatus.BAD_REQUEST);
+        if(null == file) {
+            new ResponseEntity<>(sharingRequest, HttpStatus.BAD_REQUEST);
         }
 
         List<Sheet> SheetList = new ArrayList<>();
         Map<String, Selection> selectionMap = new HashMap<>();
         for(Selection selection: sharingRequest.getSelections()) {
             Sheet sheet = sheetRepository.findByFileIdAndSheetName(file.getFileId(), selection.getSheetName());
-            if(sheet != null) {
+            if(null != sheet) {
                 SheetList.add(sheet);
                 selectionMap.put(selection.getSheetName(), selection);
             }
         }
-        if(SheetList.size() == 0) {
-            new ResponseEntity<SharingRequest>(sharingRequest, HttpStatus.BAD_REQUEST);
+        if(0 == SheetList.size()) {
+            new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         for(User user: users) {
             for(Sheet sheet: SheetList) {
                 Selection selection = selectionMap.get(sheet.getSheetName());
                 Access access = accessRepository.findBySheetIdAndUserId(sheet.getSheetId(), user.getUserId());
-                if(access != null) {
+                if(null != access) {
+                    // TODO ADD merge logic
                     access.getAccessMatrix().getCells().add(selection.getCellRange());
                     accessRepository.save(access);
                 } else {
                     access = new Access();
-                    access.setAccessMatrix(new AccessMatrix());
                     access.setUser(user);
                     access.setSheet(sheet);
+                    access.setAccessMatrix(new AccessMatrix(new ArrayList<>()));
 
-                    if(selection.getCellRange() == null) {
-                        access.getAccessMatrix().setIsWholeSheet(true);
-                    } else {
-                        access.getAccessMatrix().setIsWholeSheet(false);
-                        access.getAccessMatrix().setCells(new ArrayList<>());
-                        access.getAccessMatrix().getCells().add(selection.getCellRange());
+                    CellRange cellRange = selection.getCellRange();
+                    if(null == cellRange) {
+                        cellRange = new CellRange(Limits.FIRST_CELL, Limits.LAST_CELL);
                     }
+                    access.getAccessMatrix().getCells().add(cellRange);
                     accessRepository.save(access);
                 }
             }
         }
 
-        return new ResponseEntity<SharingRequest>(sharingRequest, HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

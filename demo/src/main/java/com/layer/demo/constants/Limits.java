@@ -9,4 +9,7 @@ public class Limits {
      */
     public static final int MAX_CELL_ROW_LENGTH = 4;
     public static final int MAX_CELL_COLUMN_VALUE = 1048576;
+    public static final String LAST_CELL = "ZZZZ1048576";
+    public static final String FIRST_CELL = "A1";
+
 }

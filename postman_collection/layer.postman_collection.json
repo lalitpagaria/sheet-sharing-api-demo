@@ -1,0 +1,138 @@
+{
+	"info": {
+		"_postman_id": "7538a24e-c5ee-4ad2-b0b3-45393b9d0c46",
+		"name": "layer",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "api/access/add",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "demo",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "user",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"file_name\": \"file1\",\n\t\"emails\": [\n\t\t\"user1@email.com\",\n\t\t\"user2@email.com\"\n\t],\n\t\"selections\": [{\n\t\t\t\"sheet_name\": \"HRReport\",\n\t\t\t\"cell_range\": null\n\t\t},\n\t\t{\n\t\t\t\"sheet_name\": \"Assumptions\",\n\t\t\t\"cell_range\": {\n\t\t\t\t\"start\": \"ABC123\",\n\t\t\t\t\"end\": null\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"sheet_name\": \"Dashboard\",\n\t\t\t\"cell_range\": {\n\t\t\t\t\"start\": \"A2\",\n\t\t\t\t\"end\": \"B2\"\n\t\t\t}\n\t\t}\n\t]\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:9090/api/access/add",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"access",
+						"add"
+					]
+				},
+				"description": "API to add sharing"
+			},
+			"response": []
+		},
+		{
+			"name": "api/access/list",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "demo",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "user",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:9090/api/access/list",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "9090",
+					"path": [
+						"api",
+						"access",
+						"list"
+					]
+				},
+				"description": "API to list sharing"
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "demo",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "user",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"id": "4dd0be5d-0ea0-4d1f-becc-c11aa4f3d9e5",
+			"key": "local",
+			"value": "127.0.0.1",
+			"type": "string"
+		}
+	]
+}

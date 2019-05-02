@@ -40,7 +40,8 @@ access_matrix JSON,
 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 modified_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 FOREIGN KEY (sheet_id) REFERENCES sheets(sheet_id),
-FOREIGN KEY (user_id) REFERENCES users(user_id)
+FOREIGN KEY (user_id) REFERENCES users(user_id),
+UNIQUE INDEX user_id_sheet_id (user_id, sheet_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 

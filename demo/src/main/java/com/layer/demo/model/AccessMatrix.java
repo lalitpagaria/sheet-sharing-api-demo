@@ -10,6 +10,5 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccessMatrix {
-    private Boolean isWholeSheet;
-    private List<CellRange> cells;
+    List<CellRange> cells;
 }
