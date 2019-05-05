@@ -13,6 +13,7 @@ API engine will provide two major APIs - `\list` and `\add`. Assuming read path 
 ## DB Schema
 
 Following DB schema is being using -
+
 ![](images/DB_schema.png)
 
 Here `access.access_matrix` will store user's list of cell level access for perticular sheet in JSON format (In future we can store only binary data to save space) as sparse matrix. If cell acess is given for a range of consecutive cells then it will store only two diagonal cells id. But for single cell it will keep only one cell id. So this way in worst case it will store half of the cell ids in DB if every alternate cells are given access.
