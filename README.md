@@ -1,65 +1,88 @@
-# Layer Backend Engineer Test
+# API Engine
 
-## Story
+## Introduction
 
-To be able to make spreadsheet sharing easier, we decided to build a tool that allows file owners to specify cells, ranges and tabs that can be shared with **recipients**. Conveniently, spreadsheet users are already familiar with a **selection** notation that is used between all the spreadsheet software. Now we need your help to build an application that this front end can make requests to.
+This is a backend **API** application that receives, stores and list **sharings**. Those sharings consists of **recipient emails** and **selections**. This **APIs** can be used by frontend.
 
-## Task
+## Architecture
 
-In your favorite language, write a backend **API** application that receives, stores and list **sharings**. Those sharings consists of **recipient emails** and **selections**. Both are sent as lists, which means you can in a single sharing specify multiple recipients and multiple selections. You are free to manage the data in the code and persist as you feel is more appropriate.
+API engine will provide two major APIs - `\list` and `\add`. Assuming read path will have major traffic then write path i.e. `\list` will have major traffic then `\add`. We proposed to have distributed write-through cache before persistant storage to handle high read load. Traffic to API Engine will be served via edge-proxy which in turn will authorize incoming requests via directory server. API Engine also will validate user via directory server. API Engine will get authentication information in request header. Here is proposed architecture -
 
-It is important to allow the user to only input **selections** that are possible in the document being shared. The sheet names are the only part to be validated, since the user can select any single cell or range, even if empty. Therefore we compiled a list of the available Sheets in this document:
+![](images/architecture.png)
 
+## DB Schema
+
+Following DB schema is being using -
+![](images/DB_schema.png)
+
+Here `access.access_matrix` will store user's list of cell level access for perticular sheet in JSON format (In future we can store only binary data to save space) as sparse matrix. If cell acess is given for a range of consecutive cells then it will store only two diagonal cells id. But for single cell it will keep only one cell id. So this way in worst case it will store half of the cell ids in DB if every alternate cells are given access.
+
+`files.git_repo` and `files.uri_path` will be used as referance to physical storage of files. So idea is to store each sheet in TSV format. Any modification to it and it's permission can be recorded as git history. And if your request that sheet then API Engine easily apply mask according to `access.access_matrix` and send it to frontend.
+
+## Cells Access Add and Merge Algorithm
+
+Our main reason to store only sparse matrix into persistant storage is to save space. But we will store pre-computed objects into cache to speed up the processing. Upone receiving `/add` request, API Engine will first fetch exiting objects from the cache, if not find then it will fetch, convert and store `two sorted vector lists` from DB, one for each row and columm. Then it will perform `binary search` into these two lists for access cell/cell_range to be added. By search it will find set of all the matching cell ranges. Among these two sets, it will find `intersection set`. Now it will find most suitable cell ranges to merge from `intersection set`. In the end it will try to condense final data by `merging and splitting` of cell ranges. After that it will store resultant data into persistant storage along with refreshing the cache. Following diagram explanin this algorithm - 
+
+![](images/algo-example.png)
+
+
+## API
+
+`\add` API (`201` if successful, `404` for validation error and `5xx` if some issue with API Engine) -
 ```
-HRReport, Actuals, Assumptions, Dashboard
+curl -X POST \
+  http://<url>/api/access/add \
+  -H 'Accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'cache-control: no-cache' \
+  -d '{
+	"file_name": "file1",
+	"emails": [
+		"user1@email.com",
+		"user2@email.com"
+	],
+	"selections": [{
+			"sheet_name": "HRReport",
+			"cell_range": null
+		},
+		{
+			"sheet_name": "Assumptions",
+			"cell_range": {
+				"start": "ABC123",
+				"end": null
+			}
+		},
+		{
+			"sheet_name": "Dashboard",
+			"cell_range": {
+				"start": "A2",
+				"end": "BB2"
+			}
+		}
+	]
+}'
 ```
 
-For the sake of simplicity you can assume:
-* the whole application is always managing the same single file.
-* to share the whole file, the user would specify all the possible selections
-
-Later another developer would also have to create files considering those sharings and make the files available to the defined recipients, but for now, we only want to be able to manage (add, list) the sharing information. 
-
-**Please describe to us:**
-* **If you had to generate a new document every time a sharing is added/modified, where would you put that piece of code? What changes would have to be done to your project?**
-* **How was your API design process and what was your motivation to on the choice of patterns**
-
-## Examples of valid selections
-
+`\list` API (response is almost identical to `/add` request) -
 ```
-SheetNameWithoutSpacesSingleCell!A1
-'Sheet Name With Spaces Single Cell'!B4
-OnlyTheSheetNameWithoutQuotes
-'SheetNameWithQuotesNoSpaces'
-'Sheet Name With Quotes And Spaces'
-'Long Sheet Name With Spaces and Range'!B3:B5
-SheetNameWithoutSpacesWithRanges!B2:B5
+curl -X GET \
+  http://127.0.0.1:9090/api/access/list \
+  -H 'Accept: application/json' \
+  -H 'cache-control: no-cache'
 ```
 
-You might also want (but is not required to) use the following regular expression for validation:
+For more information refer swagger UI (`/swagger-ui.html`).
 
-PCRE
-`^((?>(?>'[\w\s]+')|(?>[\w\s]+))(?>![A-Z]{1}[0-9]{1})?(?>:[A-Z]{1}[0-9])?)`
 
-Javascript
-`^('[\w\s]+'|[\w\s]+)(![A-Z]+[0-9]+)?(:[A-Z]+[0-9]+)?`
+## Implementation
 
-if you do, feel free to criticize and improve the expression if you feel it is needed
+I have developed API Engine in `Spring Boot Java` framework. And used many `Spring` provided SDKs to DB, Cache, LDAP server, validation, http server etc. 
 
-## Further instructions
-* A new private repository was created only for your test (you can work directly on it, but if you fork, make sure to keep your copy private). When you finish notify fabio@golayer.io.
-* Feel free to use any libraries that can be installed from a package manager, but do not use any rapid-development or full-stack frameworks (micro-frameworks or components of full-stack frameworks that can be independently installed and configured are allowed).
-* **Consider that you are developing a production-ready service and it has to be maintained for the next 3 years.**
-* Include a new Markdown file (or update this one) with your answer for the questions in the task and any further implementation details that you might want to explain. Do not hesitate to include suggestions on how this test could be improved.
-* Please provide sample requests (curl commands are not required, but would be appreciated)
-* Your application needs to run with as much simplicity as possible. We highly recommend you to use Docker and Docker Compose, but single line commands with few system dependencies would be accepted (in this case, please provide running instructions).
-* Given the results fit our minimum acceptance criteria, we will schedule a call and this test will be one of the subjects of the conversation.
-* We aim to make a final decision within seven days. Please try to submit the test within 3 to 4 days. If you are unable to provide the results within the given timeline, please let us know.
-* Please contact us for any questions you might have during the process.
 
-## Evaluation criteria
-* You follow best practices appropriate to your language of choice
-* Code is clean and readable.
-* Code is maintainable. We will evaluate what that means for you based on your results.
-* There is attention to the **domain** expressed in the code.
-* There is attention to HTTP communication if that is appropriate in the language/framework used.
+## How to Run
+
+First install `maven`, `JDK` and `Docker Engine`. Then
+ modify application configuration file (`demo//src/main/resources/application.properties`) according to need. Also modify Docker Compose file (`stack.yml`) as per need. Also if you want to load some default data in DB then modify DB init file (`demo//src/main/resources/db/migration/V1__add_tables.sql`) as well. Inorder to deploy stack execute - 
+ ```
+ docker stack deploy <name of the stack>
+ ```
