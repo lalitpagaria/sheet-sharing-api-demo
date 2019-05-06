@@ -87,3 +87,12 @@ First install `maven`, `JDK` and `Docker Engine`. Then
  ```
  docker stack deploy <name of the stack>
  ```
+
+## Pending Items
+
+* Algorithm implementation for `/add`
+* Store only binary JSON data into DB
+* Remove Spring Actuator
+* Clean up application config
+* JUnit test cases
+* PoC with UI
